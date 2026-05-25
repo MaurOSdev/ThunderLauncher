@@ -1,0 +1,36 @@
+.welcome-box {
+    -fx-background-color: #0d1117; /* un fondo asi fuaaaaaaaa */
+    -fx-padding: 50;
+}
+
+.title-thunder {
+    -fx-text-fill: #00b4d8; /* azul asi bien azuleishon */
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Segoe UI", "Helvetica", sans-serif;
+}
+
+.subtitle-thunder {
+    -fx-text-fill: #8b949e; /* gris clarito asi bien fuafua */
+    -fx-font-size: 14px;
+}
+
+.btn-action {
+    -fx-padding: 12 24 12 24;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+
+.btn-offline {
+    -fx-background-color: #21262d;
+    -fx-text-fill: #c9d1d9;
+    -fx-border-color: #30363d;
+    -fx-border-radius: 6;
+}
+
+.btn-microsoft {
+    -fx-background-color: #0078d4; /* azul microsoft */
+    -fx-text-fill: white;
+}
