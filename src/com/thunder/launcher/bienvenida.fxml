@@ -4,10 +4,14 @@
 <?import javafx.scene.image.*?>
 
 <VBox
-        alignment="CENTER" spacing="25" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.omarchy.launcher.BienvenidaController">
 
-    <ImageView fx:id="launcherLogo" fitWidth="100" fitHeight="100" pickOnBounds="true" preserveRatio="true">
+xmlns="http://javafx.com/javafx/17"
+xmlns:fx="http://javafx.com/fxml/1"
+fx:controller="com.thunder.launcher.BienvenidaController"
+>
+>
+
+    <ImageView preserveRatio="true">
     </ImageView>
 
     <VBox alignment="CENTER" spacing="5">
@@ -21,3 +25,4 @@
     </HBox>
 
 </VBox>
+
