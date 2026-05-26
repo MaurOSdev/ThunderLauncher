@@ -1,70 +1,56 @@
 package com.thunder.launcher;
 
-import javax.swing.*;
-import java.awt.*;
-import java.net.URL;
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 
-public class Main {
-    public static void main(String[] args) {
-        // ejecutar la interfaz en awjsdsddas o nose que kaka
-        SwingUtilities.invokeLater(() -> {
-            // twin
-            JFrame ventana = new JFrame("com.thunder.launcher.ThunderLauncher v1.0 - Creando Directorios");
-            ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            ventana.setSize(500, 500);
-            ventana.setLocationRelativeTo(null);
-            ventana.getContentPane().setBackground(new Color(15, 15, 15));
+// heredamos la wa clasica a javafx
+public class Main extends Application {
 
-            System.out.println("======================================");
-            System.out.println("creando las carpetas");
-            System.out.println("======================================");
+    @Override
+    public void start(Stage ventana) throws Exception {
+        System.out.println("======================================");
+        System.out.println("creando las carpetas");
+        System.out.println("======================================");
 
-            // ==========================================
-            // dale bro ya casi
-            // ==========================================
-            try {
-                // deinimos la ruta de el proyecto
-                // usamos el . asi se hace bien escondidita asi bien waos
-                Path rutaCarpeta = Paths.get(".thunderlauncher_data");
-
-                // veamos si la carpeta existe o valemos monda
-                if (Files.notExists(rutaCarpeta)) {
-                    // hagase la luz
-                    Files.createDirectory(rutaCarpeta);
-                    System.out.println("LA CARPTEMASJKDJAKFJA SE CREO SJFJKASNFKJSAXNFKASNCSLKA");
-                } else {
-                    System.out.println("la carpeta ya existia en un rincon del sistema");
-                }
-            } catch (Exception e) {
-                System.out.println("error de escritura no se pudo crear la carpeta " + e.getMessage());
+        // una logica asi bien waos
+        try {
+            Path rutaCarpeta = Paths.get(".thunderlauncher_data");
+            if (Files.notExists(rutaCarpeta)) {
+                Files.createDirectory(rutaCarpeta);
+                System.out.println("LA CARPETA JKDJAKFJA SE CREO SJFJKASNFKJSAXNFKASNCSLKA");
+            } else {
+                System.out.println("la carpeta ya existia en un rincon del sistema");
             }
-            // ==========================================
+        } catch (Exception e) {
+            System.out.println("error de escritura no se pudo crear la carpeta porque la mosca nos la mojsuizjvuisdjviknvklvmvnkm" + e.getMessage());
+        }
 
-            // duke
-            try {
-                java.net.URI uri = new java.net.URI("https://pbs.twimg.com/profile_images/1182586235744710656/zYfBUJhU_400x400.jpg");
-                URL url = uri.toURL();
+        // ==========================================================
+        // ufff ojala cargue
+        // ==========================================================
+        System.out.println("[OK] Cargando el fxml del futuro...");
 
-                ImageIcon iconolisto = new ImageIcon(url);
-                Image img = iconolisto.getImage().getScaledInstance(480, 480, Image.SCALE_SMOOTH);
-                JLabel etiquetaImagen = new JLabel(new ImageIcon(img));
-                etiquetaImagen.setHorizontalAlignment(JLabel.CENTER);
+        // cargamos el fxml asi bien fuafufaufaufaf
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/bienvenida.fxml"));
+        Parent root = loader.load();
 
-                ventana.add(etiquetaImagen, BorderLayout.CENTER);
-                System.out.println("[OK] El duke de Twitter cargo gigante XIJSLDAKFASGJ");
+        // creamos esta wa y la centramos sisisi
+        Scene escena = new Scene(root, 500, 500);
 
-            } catch (Exception e) {
-                JLabel errorLabel = new JLabel("error de carga del duke pero ta joya la careta");
-                errorLabel.setForeground(Color.RED);
-                errorLabel.setHorizontalAlignment(JLabel.CENTER);
-                ventana.add(errorLabel);
-                System.out.println("     [WARN] fallo la imagen pero ta joya");
-            }
+        // Si quieres meterle el CSS desde Java, se hace así de una:
+        escena.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/bienvenida.css")).toExternalForm());
 
-            ventana.setVisible(true);
-        });
+        ventana.setTitle("com.thunder.launcher.ThunderLauncher v1.0");
+        ventana.setScene(escena);
+        ventana.setScene(null); // nota mia pa que no se me olvide esta wa En javafx puro esto no existe igual se centra solo o se maneja por el os
+        ventana.show(); // abracadara
     }
+
 }
