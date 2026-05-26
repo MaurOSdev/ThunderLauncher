@@ -35,22 +35,20 @@ public class Main extends Application {
         // ==========================================================
         // ufff ojala cargue
         // ==========================================================
-        System.out.println("[OK] Cargando el fxml del futuro...");
+        System.out.println("[OK] cargando el fxml");
 
-        // cargamos el fxml asi bien fuafufaufaufaf
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/bienvenida.fxml"));
+        // cargamos el fxml asi bien fuafufaufaufaf (sin la barra / inicial)
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("bienvenida.fxml"));
         Parent root = loader.load();
 
-        // creamos esta wa y la centramos sisisi
+// creamos esta wa y la centramos sisisi
         Scene escena = new Scene(root, 500, 500);
 
-        // ahi lo metemos bien fuafuafua el css
-        escena.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/bienvenida.css")).toExternalForm());
+// ahi muy bien XD
+        escena.getStylesheets().add(Objects.requireNonNull(getClass().getResource("bienvenida.css")).toExternalForm());
 
         ventana.setTitle("com.thunder.launcher.ThunderLauncher v1.0");
-        ventana.setScene(escena);
-        ventana.setScene(null); // nota mia pa que no se me olvide esta wa En javafx puro esto no existe igual se centra solo o se maneja por el os
+        ventana.setScene(escena); // se queda asi y nada mas csm
         ventana.show(); // abracadara
-    }
-
+     }
 }
