@@ -38,14 +38,14 @@ public class Main extends Application {
         System.out.println("[OK] cargando el fxml");
 
         // agregamos la / pa que no explote esta wa
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/bienvenida.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("bienvenida.fxml"));
         Parent root = loader.load();
 
         // creamos esta wa y la centramos sisisi
         Scene escena = new Scene(root, 500, 500);
 
         // ahora zi
-        escena.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/bienvenida.css")).toExternalForm());
+        escena.getStylesheets().add(Objects.requireNonNull(getClass().getResource("bienvenida.css")).toExternalForm());
 
         ventana.setTitle("com.thunder.launcher.ThunderLauncher v1.0");
         ventana.setScene(escena); // se queda asi y nada mas csm
