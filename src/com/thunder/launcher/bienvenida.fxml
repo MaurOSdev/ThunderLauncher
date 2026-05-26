@@ -3,11 +3,14 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.image.*?>
 
+
 <VBox
         xmlns="http://javafx.com/javafx/17"
         xmlns:fx="http://javafx.com/fxml/1"
         fx:controller="com.thunder.launcher.BienvenidaController"
         styleClass="welcome-box"
+        alignment="CENTER"
+        spacing="20"
 > <ImageView preserveRatio="true">
 </ImageView>
 
