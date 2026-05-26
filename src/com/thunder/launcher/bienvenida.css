@@ -7,7 +7,7 @@
     -fx-text-fill: #00b4d8; /* azul asi bien azuleishon */
     -fx-font-size: 28px;
     -fx-font-weight: bold;
-    -fx-font-family: "Segoe UI", "Helvetica", sans-serif;
+    -fx-font-family: "System"; /* usamos el font del sistema ssisisisisisiadsfjgfhbijosdamnfgjfesdkfgnjemsdkfnjgfkmdbngfkdvfdiOÑADOSCJKOKDSJGKSKSAFKSLDFKJDC
 }
 
 .subtitle-thunder {
@@ -16,11 +16,11 @@
 }
 
 .btn-action {
+    /* fix asi bien ricolin */
     -fx-padding: 12 24 12 24;
     -fx-font-size: 14px;
     -fx-font-weight: bold;
     -fx-background-radius: 6;
-    -fx-cursor: hand;
 }
 
 .btn-offline {
@@ -31,6 +31,6 @@
 }
 
 .btn-microsoft {
-    -fx-background-color: #0078d4; /* azul microsoft */
+    -fx-background-color: #0078d4; /* azul microsoft sisisisisisiiiiiiiiiiiiiiiiiii */
     -fx-text-fill: white;
 }
