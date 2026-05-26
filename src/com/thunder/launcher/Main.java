@@ -44,7 +44,7 @@ public class Main extends Application {
         // creamos esta wa y la centramos sisisi
         Scene escena = new Scene(root, 500, 500);
 
-        // Si quieres meterle el CSS desde Java, se hace así de una:
+        // ahi lo metemos bien fuafuafua el css
         escena.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/bienvenida.css")).toExternalForm());
 
         ventana.setTitle("com.thunder.launcher.ThunderLauncher v1.0");
