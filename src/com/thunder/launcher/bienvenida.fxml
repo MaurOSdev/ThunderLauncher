@@ -21,7 +21,7 @@
 
     <HBox alignment="CENTER" spacing="15">
         <Button text="Añadir Cuenta Offline" fx:id="btnOffline" onAction="#manejarCuentaOffline" styleClass="btn-action btn-offline"/>
-        <Button text="Iniciar con Microsoft" fx:id="btnMicrosoft" onAction="#manejarCuentaOffline" styleClass="btn-action btn-microsoft"/>
+        <Button text="Iniciar con Microsoft" fx:id="btnMicrosoft" onAction="#manejarCuentaMicrosoft" styleClass="btn-action btn-microsoft"/>
     </HBox>
 
 </VBox>
