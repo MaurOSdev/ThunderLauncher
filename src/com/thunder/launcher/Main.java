@@ -9,77 +9,87 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
+import java.nio.charset.StandardCharsets;
 
-// heredamos la wa clasica a javafx
 public class Main extends Application {
 
     @Override
     public void start(Stage ventana) throws Exception {
         System.out.println("======================================");
-        System.out.println("creando las carpetas");
+        System.out.println("creando las carpetas del bunker");
         System.out.println("======================================");
 
-        // esta wa crea las carpeta JSIJFAHJIKFS
         try {
             String carpetaHome = System.getProperty("user.home");
-            Path rutaCarpeta = java.nio.file.Paths.get(carpetaHome, ".thunder");
+            Path rutaCarpeta = Paths.get(carpetaHome, ".thunder");
 
-            if (java.nio.file.Files.notExists(rutaCarpeta)) {
-                java.nio.file.Files.createDirectory(rutaCarpeta);
+            if (Files.notExists(rutaCarpeta)) {
+                Files.createDirectory(rutaCarpeta);
                 System.out.println("la carpeta se creo XD");
             } else {
-                System.out.println("la carpeta .thunder existia en... bueno algun lado");
+                System.out.println("la carpeta .thunder ya existia de pana");
             }
         } catch (Exception e) {
-            System.out.println("error de escritura porque la mosca nos las djkansfiuAJcIJhYUAXCHDSJZHXBDHKJJ jh " + e.getMessage());
+            System.out.println("error de escritura cf " + e.getMessage());
         }
 
         // ==========================================================
-        // ojala cargue de pana
+        // ahora EL DESFOBUSCADOR
         // ==========================================================
         String carpetaHome = System.getProperty("user.home");
-        Path rutaCarpeta = Paths.get(carpetaHome, ".thunder");
-        Path rutaArchivo = rutaCarpeta.resolve("user_session.txt");
+        Path rutaArchivo = Paths.get(carpetaHome, ".thunder", "user_session.txt");
 
-        String fxmlInicial = "bienvenida.fxml"; // por defecto la bienveida cffffff
-        String cssInicial = "bienvenida.css";   // Su CSS por si las moscas
+        String fxmlInicial = "bienvenida.fxml"; // fallback por si no existe token por si las moscas XD
 
         try {
-            // ahora cambiamos la sesion
-            if (Files.exists(rutaArchivo) && Files.size(rutaArchivo) > 0) {
-                String usuarioGuardado = Files.readString(rutaArchivo, java.nio.charset.StandardCharsets.UTF_8).trim();
-                if (!usuarioGuardado.isEmpty()) {
-                    System.out.println("[AUTO-LOGIN] Detectada cuenta de: " + usuarioGuardado + ". Saltando directo al panel principal!");
-                    fxmlInicial = "MainFxml.fxml"; // redirigimos a Main
-                    cssInicial = "principal.css";  // cambiamos el css
+            // minimo mas de 70 caracteres ahora
+            if (Files.exists(rutaArchivo) && Files.size(rutaArchivo) > 70) {
+                String contenido = Files.readString(rutaArchivo, StandardCharsets.UTF_8).trim();
+
+                System.out.println("[sistema] leyendo los tokens");
+
+                // desempaquetamos los indices de control XD
+                int lenBasuraInicio = Integer.parseInt(contenido.substring(0, 3));
+                int lenBasuraMedio = Integer.parseInt(contenido.substring(3, 6));
+
+                // solo quedarnos con la data
+                String dataConBasura = contenido.substring(6);
+
+                // rebanamos la basura como un pepino sisisiii
+                String desdeUsuario = dataConBasura.substring(lenBasuraInicio);
+
+                // siempre mide 1 stack de caracteres XD
+                String hashGuardado = desdeUsuario.substring(desdeUsuario.length() - 64);
+
+                // ahora esto
+                String usuarioPuroConBasuraMedio = desdeUsuario.substring(0, desdeUsuario.length() - 64);
+                String usuarioGuardado = usuarioPuroConBasuraMedio.substring(0, usuarioPuroConBasuraMedio.length() - lenBasuraMedio);
+
+                if (!usuarioGuardado.isEmpty() && hashGuardado.length() == 64) {
+                    System.out.println("[AUTO-LOGIN] ¡Descifrado de mapa de 3 digitos exitoso!");
+                    System.out.println("[AUTO-LOGIN] Bienvenido " + usuarioGuardado);
+
+                    fxmlInicial = "MainFxml.fxml"; // esto es lo shidori
                 }
             }
         } catch (Exception e) {
-            System.out.println("[WARN] no se pudo encontrar la sesion " + e.getMessage());
+            System.out.println("[WARN] token corrupto seguramente " + e.getMessage());
         }
 
-        System.out.println("[OK] cargando el fxml " + fxmlInicial);
+        System.out.println("[OK] cargando el fxml inteligente: " + fxmlInicial);
 
-        // Cargamos la wa
         FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlInicial));
         Parent root = loader.load();
 
-        // creamos esta wa y la centramos sisisi
         Scene escena = new Scene(root, 500, 500);
 
-        // C
-        try {
-            if (getClass().getResource(cssInicial) != null) {
-                escena.getStylesheets().add(Objects.requireNonNull(getClass().getResource(cssInicial)).toExternalForm());
-            } else {
-                System.out.println("[WARN] no se encontro el css " + cssInicial + "iniciando normal");
-            }
-        } catch (Exception e) {
-            System.out.println("[WARN] Fallo la wea de estilos JAJAJA " + e.getMessage());
+        // XD
+        if (fxmlInicial.equals("bienvenida.fxml")) {
+            escena.getStylesheets().add(Objects.requireNonNull(getClass().getResource("bienvenida.css")).toExternalForm());
         }
 
         ventana.setTitle("com.thunder.launcher.ThunderLauncher v1.0");
-        ventana.setScene(escena); // se queda asi y nada mas csm
-        ventana.show(); // abracadara
+        ventana.setScene(escena);
+        ventana.show();
     }
 }

@@ -15,7 +15,6 @@ import java.util.Optional;
 import java.security.MessageDigest;
 import java.nio.charset.StandardCharsets;
 
-// importamos estas cacas pa que mi IDE no parezca sangre de tanto code en rojo
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -80,35 +79,54 @@ public class BienvenidaController {
 
             lblSubtitulo.setText("Gracias por elegir ThunderLauncher " + usuario + "!");
 
-// ========================================================
-                    // ahora si viene lo shidori
-                    // ========================================================
-                    try {
-                        System.out.println("[LOGS] Guardando credenciales en el búnker .thunder...");
+            try {
+                System.out.println("[LOGS] UAUAUAUAUA");
 
-                        // buscamos el /home o el appdata XDXKSJFJAI
-                        String carpetaHome = System.getProperty("user.home");
-                        java.nio.file.Path rutaCarpeta = java.nio.file.Paths.get(carpetaHome, ".thunder");
-                        java.nio.file.Path rutaArchivo = rutaCarpeta.resolve("user_session.txt");
+                String carpetaHome = System.getProperty("user.home");
+                java.nio.file.Path rutaCarpeta = java.nio.file.Paths.get(carpetaHome, ".thunder");
+                java.nio.file.Path rutaArchivo = rutaCarpeta.resolve("user_session.txt");
 
-                        // escribimos el nicknae del loco que se logeo asi bien cfffff
-                        java.nio.file.Files.writeString(rutaArchivo, usuario, java.nio.charset.StandardCharsets.UTF_8);
-                        System.out.println("[OK] sesion guardada de pana en smnasjfnajsf: " + rutaArchivo.toAbsolutePath());
+                // Generador de cosas al azar sin derretir la ram JAJAJA
+                java.util.Random random = new java.util.Random();
+                String caracteres = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;':\",./<>?";
 
-                        // cambiamos al MainFxml.fxml
-                        System.out.println("[LOGS] Mutando el chasis al panel principal...");
-                        FXMLLoader loader = new FXMLLoader(getClass().getResource("MainFxml.fxml"));
-                        Parent rootPrincipal = loader.load();
+                // 100 y 200 caracteres
+                int tamanoBasuraInicio = 100 + random.nextInt(200);
+                int tamanoBasuraMedio = 100 + random.nextInt(200);
 
-                        Stage ventanaActual = (Stage) btnOffline.getScene().getWindow();
-                        Scene nuevaEscena = new Scene(rootPrincipal, 500, 500);
-                        ventanaActual.setScene(nuevaEscena);
+                // muralla de caracteres que bueno funcionan (creo)
+                StringBuilder basuraInicio = new StringBuilder();
+                for (int i = 0; i < tamanoBasuraInicio; i++) {
+                    basuraInicio.append(caracteres.charAt(random.nextInt(caracteres.length())));
+                }
 
-                    } catch (Exception e) {
-                        System.out.println("[ERROR] no se pudo logear oooooooooooooo no se pudo cambiar la escena: " + e.getMessage());
-                        e.printStackTrace();
-                    }
-            // ========================================================
+                // aqui si axnfjasfja
+                StringBuilder basuraMedio = new StringBuilder();
+                for (int i = 0; i < tamanoBasuraMedio; i++) {
+                    basuraMedio.append(caracteres.charAt(random.nextInt(caracteres.length())));
+                }
+
+                // ufff
+                String mapaFicheros = String.format("%03d%03d", tamanoBasuraInicio, tamanoBasuraMedio);
+
+                // ahora si
+                String payloadSupremo = mapaFicheros + basuraInicio.toString() + usuario + basuraMedio.toString() + contraHasheada;
+
+                java.nio.file.Files.writeString(rutaArchivo, payloadSupremo, StandardCharsets.UTF_8);
+                System.out.println("[OK] ahora la sesion portatil esta ok XD");
+
+                // Cambiamos de escena al MainFxml.fxml
+                System.out.println("[LOGS] Mutando el chasis al panel principal...");
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("MainFxml.fxml"));
+                Parent rootPrincipal = loader.load();
+                Stage ventanaActual = (Stage) btnOffline.getScene().getWindow();
+                Scene nuevaEscena = new Scene(rootPrincipal, 500, 500);
+                ventanaActual.setScene(nuevaEscena);
+
+            } catch (Exception e) {
+                System.out.println("[ERROR] Falló el coso dinamico: " + e.getMessage());
+                e.printStackTrace();
+            }
         });
     }
 
