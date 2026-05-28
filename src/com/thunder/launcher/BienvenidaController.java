@@ -81,31 +81,32 @@ public class BienvenidaController {
             lblSubtitulo.setText("Gracias por elegir ThunderLauncher " + usuario + "!");
 
             // ========================================================
-            // ahora si lo shido
+            // ahora si PUM
             // ========================================================
             try {
-                System.out.println("[LOGS] ahora el cambio");
+                System.out.println("[LOGS] Mutando el chasis al panel principal...");
 
-                // ahora si
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("bienvenida.fxml"));
+                // cargamos esto pa que no explote
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("MainFxml.fxml"));
                 Parent rootPrincipal = loader.load();
 
-                // ahora hacemos de palanca
+                // Hacemos palanca con el boton de offline XD
                 Stage ventanaActual = (Stage) btnOffline.getScene().getWindow();
 
-                // 3. Metemos el nuevo chasis visual a la escena (500x500 como el Main)
+                // armamos como lego esto
                 Scene nuevaEscena = new Scene(rootPrincipal, 500, 500);
 
 
-                nuevaEscena.getStylesheets().add(getClass().getResource("bienvenida.css").toExternalForm());
-
-                // ahora arrancamos
+                // nuevaEscena.getStylesheets().add(getClass().getResource("principal.css").toExternalForm());
+//por si las moscas no o añado aun no tengo preparado el css para esto
+                // ahora si
                 ventanaActual.setScene(nuevaEscena);
 
             } catch (Exception e) {
-                System.out.println("[ERROR] ummm creo que algo no funca le hecho la culpa al bienvenida.fxml " + e.getMessage());
+                System.out.println("[ERROR] no se pudo cambiar la escena: " + e.getMessage());
                 e.printStackTrace();
             }
+            // ========================================================
         });
     }
 
