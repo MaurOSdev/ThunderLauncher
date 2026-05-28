@@ -19,17 +19,19 @@ public class Main extends Application {
         System.out.println("creando las carpetas");
         System.out.println("======================================");
 
-        // una logica asi bien waos
+        // esta wa crea las carpeta JSIJFAHJIKFS
         try {
-            Path rutaCarpeta = Paths.get(".thunderlauncher_data");
-            if (Files.notExists(rutaCarpeta)) {
-                Files.createDirectory(rutaCarpeta);
-                System.out.println("LA CARPETA JKDJAKFJA SE CREO SJFJKASNFKJSAXNFKASNCSLKA");
+            String carpetaHome = System.getProperty("user.home");
+            Path rutaCarpeta = java.nio.file.Paths.get(carpetaHome, ".thunder");
+
+            if (java.nio.file.Files.notExists(rutaCarpeta)) {
+                java.nio.file.Files.createDirectory(rutaCarpeta);
+                System.out.println("la carpeta se creo XD");
             } else {
-                System.out.println("la carpeta ya existia en un rincon del sistema");
+                System.out.println("la carpeta .thunder existia en... bueno algun lado");
             }
         } catch (Exception e) {
-            System.out.println("error de escritura no se pudo crear la carpeta porque la mosca nos la mojsuizjvuisdjviknvklvmvnkm" + e.getMessage());
+            System.out.println("error de escritura porque la mosca nos las djkansfiuAJcIJhYUAXCHDSJZHXBDHKJJ jh " + e.getMessage());
         }
 
         // ==========================================================
@@ -37,7 +39,7 @@ public class Main extends Application {
         // ==========================================================
         System.out.println("[OK] cargando el fxml");
 
-        // agregamos la / pa que no explote esta wa
+        // agregamos la barrita pa que no explote esta mrd
         FXMLLoader loader = new FXMLLoader(getClass().getResource("bienvenida.fxml"));
         Parent root = loader.load();
 
