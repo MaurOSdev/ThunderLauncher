@@ -15,6 +15,12 @@ import java.util.Optional;
 import java.security.MessageDigest;
 import java.nio.charset.StandardCharsets;
 
+// importamos estas cacas pa que mi IDE no parezca sangre de tanto code en rojo
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+
 public class BienvenidaController {
 
     @FXML
@@ -30,7 +36,6 @@ public class BienvenidaController {
     private void manejarCuentaOffline() {
         System.out.println("[LOGS] abriendo el panel de credenciales");
 
-        // lito
         Dialog<Pair<String, String>> dialog = new Dialog<>();
         dialog.setTitle("Crear Cuenta Offline");
         dialog.setHeaderText("Configure su acceso porfavor!");
@@ -68,22 +73,47 @@ public class BienvenidaController {
             String usuario = credenciales.getKey();
             String contraPlana = credenciales.getValue();
 
-            // sisisiiiiiiiiiiiii
             System.out.println("[logs] Gracias por elegir ThunderLauncher!: " + usuario);
 
             String contraHasheada = encriptarClave(contraPlana);
             System.out.println("aca esta el ..." + contraHasheada);
 
-            // Ahora si xkdxjdxjfkx
-            lblSubtitulo.setText("¡Gracias por elegir ThunderLauncher, " + usuario + "!");
+            lblSubtitulo.setText("Gracias por elegir ThunderLauncher " + usuario + "!");
+
+            // ========================================================
+            // ahora si lo shido
+            // ========================================================
+            try {
+                System.out.println("[LOGS] ahora el cambio");
+
+                // ahora si
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("bienvenida.fxml"));
+                Parent rootPrincipal = loader.load();
+
+                // ahora hacemos de palanca
+                Stage ventanaActual = (Stage) btnOffline.getScene().getWindow();
+
+                // 3. Metemos el nuevo chasis visual a la escena (500x500 como el Main)
+                Scene nuevaEscena = new Scene(rootPrincipal, 500, 500);
+
+
+                nuevaEscena.getStylesheets().add(getClass().getResource("bienvenida.css").toExternalForm());
+
+                // ahora arrancamos
+                ventanaActual.setScene(nuevaEscena);
+
+            } catch (Exception e) {
+                System.out.println("[ERROR] ummm creo que algo no funca le hecho la culpa al bienvenida.fxml " + e.getMessage());
+                e.printStackTrace();
+            }
         });
-    } // aca un fix tmv
-    @FXML // XD
-    private void manejarCuentaMicrosoft() { // aca un super fix que meti por error
+    }
+
+    @FXML
+    private void manejarCuentaMicrosoft() {
         System.out.println("[logs] inciar con microsoft");
     }
 
-    // aca la licuadora
     private String encriptarClave(String claveOriginal) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -105,4 +135,4 @@ public class BienvenidaController {
     public void initialize() {
         System.out.println("[OK] Gracias por elegir ThunderLauncher!");
     }
-} // el final
+}
