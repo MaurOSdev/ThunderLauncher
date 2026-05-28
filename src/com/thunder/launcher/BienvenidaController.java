@@ -87,7 +87,7 @@ public class BienvenidaController {
                 System.out.println("[LOGS] Mutando el chasis al panel principal...");
 
                 // cargamos esto pa que no explote
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("MainFxml.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/thunder/launcher/MainFxml.fxml"));
                 Parent rootPrincipal = loader.load();
 
                 // Hacemos palanca con el boton de offline XD
