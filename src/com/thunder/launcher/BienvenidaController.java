@@ -80,32 +80,34 @@ public class BienvenidaController {
 
             lblSubtitulo.setText("Gracias por elegir ThunderLauncher " + usuario + "!");
 
-            // ========================================================
-            // ahora si PUM
-            // ========================================================
-            try {
-                System.out.println("[LOGS] Mutando el chasis al panel principal...");
+// ========================================================
+                    // ahora si viene lo shidori
+                    // ========================================================
+                    try {
+                        System.out.println("[LOGS] Guardando credenciales en el búnker .thunder...");
 
-                // cargamos esto pa que no explote
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/thunder/launcher/MainFxml.fxml"));
-                Parent rootPrincipal = loader.load();
+                        // buscamos el /home o el appdata XDXKSJFJAI
+                        String carpetaHome = System.getProperty("user.home");
+                        java.nio.file.Path rutaCarpeta = java.nio.file.Paths.get(carpetaHome, ".thunder");
+                        java.nio.file.Path rutaArchivo = rutaCarpeta.resolve("user_session.txt");
 
-                // Hacemos palanca con el boton de offline XD
-                Stage ventanaActual = (Stage) btnOffline.getScene().getWindow();
+                        // escribimos el nicknae del loco que se logeo asi bien cfffff
+                        java.nio.file.Files.writeString(rutaArchivo, usuario, java.nio.charset.StandardCharsets.UTF_8);
+                        System.out.println("[OK] sesion guardada de pana en smnasjfnajsf: " + rutaArchivo.toAbsolutePath());
 
-                // armamos como lego esto
-                Scene nuevaEscena = new Scene(rootPrincipal, 500, 500);
+                        // cambiamos al MainFxml.fxml
+                        System.out.println("[LOGS] Mutando el chasis al panel principal...");
+                        FXMLLoader loader = new FXMLLoader(getClass().getResource("MainFxml.fxml"));
+                        Parent rootPrincipal = loader.load();
 
+                        Stage ventanaActual = (Stage) btnOffline.getScene().getWindow();
+                        Scene nuevaEscena = new Scene(rootPrincipal, 500, 500);
+                        ventanaActual.setScene(nuevaEscena);
 
-                // nuevaEscena.getStylesheets().add(getClass().getResource("principal.css").toExternalForm());
-//por si las moscas no o añado aun no tengo preparado el css para esto
-                // ahora si
-                ventanaActual.setScene(nuevaEscena);
-
-            } catch (Exception e) {
-                System.out.println("[ERROR] no se pudo cambiar la escena: " + e.getMessage());
-                e.printStackTrace();
-            }
+                    } catch (Exception e) {
+                        System.out.println("[ERROR] no se pudo logear oooooooooooooo no se pudo cambiar la escena: " + e.getMessage());
+                        e.printStackTrace();
+                    }
             // ========================================================
         });
     }
