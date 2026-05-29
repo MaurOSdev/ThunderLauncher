@@ -4,6 +4,7 @@
 
 <VBox xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.thunder.launcher.MainFxmlController"
       alignment="CENTER"
       spacing="25"
       style="-fx-background-color: #0d1117; -fx-padding: 50;">
@@ -21,7 +22,9 @@
                   style="-fx-background-color: #21262d; -fx-text-fill: white; -fx-border-color: #30363d; -fx-border-radius: 6; -fx-background-radius: 6;"/>
     </HBox>
 
-    <Button text="iniciar minecraft"
+    <Button fx:id="btnJugar"
+            text="iniciar minecraft"
+            onAction="#lanzarMinecraft"
             style="-fx-background-color: #0078d4; -fx-text-fill: white; -fx-padding: 15 30 15 30; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 6;"/>
 
 </VBox>
