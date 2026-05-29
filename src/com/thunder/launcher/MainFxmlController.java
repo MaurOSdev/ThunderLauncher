@@ -54,7 +54,7 @@ public class MainFxmlController {
         // 1. METEMOS TODO EN UN HILO SEPARADO para que descargue sin congelar la GUI
         new Thread(() -> {
             try {
-                String urlJsonMojang = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json";
+                String urlJsonMojang = "https://piston-meta.mojang.com/v1/packages/7dfdbbdf9f50ad32650668bbb3897e58ef50abc5/26.1.1.json";
 
                 // llamamos al fuego
                 System.out.println("[MOTOR] DownloaderEngine AHORA");
