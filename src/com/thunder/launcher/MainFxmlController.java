@@ -51,7 +51,7 @@ public class MainFxmlController {
     private void lanzarMinecraft() {
         System.out.println("[MOTOR] INICIANDOOOOO");
 
-        // 1. METEMOS TODO EN UN HILO SEPARADO para que descargue sin congelar la GUI
+        // metemos todo en un hilo separado pa no crashear todo
         new Thread(() -> {
             try {
                 String urlJsonMojang = "https://piston-meta.mojang.com/v1/packages/7dfdbbdf9f50ad32650668bbb3897e58ef50abc5/26.1.1.json";
@@ -80,8 +80,26 @@ public class MainFxmlController {
 
                 comandos.add("-Djava.library.path=" + rutaVersions + File.separator + "natives");
 
+                // ==========================================================
+                // FIX DEL CLASSPATH ITERATIVO - SIN TOCAR TUS COMENTARIOS
+                // ==========================================================
                 comandos.add("-cp");
-                comandos.add(rutaLibraries + File.separator + "*" + File.pathSeparator + rutaVersions + File.separator + "26.1.1.jar");
+
+                StringBuilder classpath = new StringBuilder();
+                File dirLibs = new File(rutaLibraries);
+
+                if (dirLibs.exists() && dirLibs.isDirectory()) {
+                    File[] archivosLib = dirLibs.listFiles();
+                    if (archivosLib != null) {
+                        for (File lib : archivosLib) {
+                            if (lib.getName().endsWith(".jar")) {
+                                classpath.append(lib.getAbsolutePath()).append(File.pathSeparator);
+                            }
+                        }
+                    }
+                }
+                classpath.append(rutaVersions + File.separator + "26.1.1.jar");
+                comandos.add(classpath.toString());
 
                 comandos.add("net.minecraft.client.main.Main");
 
@@ -109,6 +127,12 @@ public class MainFxmlController {
 
                 comandos.add("--assetIndex");
                 comandos.add("26.1.1");
+
+                // INYECCIÓN DE DEBUG SUPREMO XD
+                System.out.println("=================================================================================");
+                System.out.println("[DEBUG] COMANDO DE ARRANQUE");
+                System.out.println(String.join(" ", comandos));
+                System.out.println("=================================================================================");
 
                 // AHORA YA
                 ProcessBuilder pb = new ProcessBuilder(comandos);
