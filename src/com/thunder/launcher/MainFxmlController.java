@@ -1,158 +1,297 @@
 package com.thunder.launcher;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
+import javafx.scene.control.*;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.layout.GridPane;
+import javafx.geometry.Insets;
+
+import javafx.concurrent.Task;
+import javafx.application.Platform;
+
 import java.io.File;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gson.*;
+
 public class MainFxmlController {
 
+    @FXML private Button btnJugar;
+    @FXML private Button btnInstancias;
+    @FXML private Button btnAjustes;
+    @FXML private ComboBox<String> cmbVersiones;
+    @FXML private ProgressBar barraProgreso;
+    @FXML private Label lblEstado;
+
+    private DownloaderEngine motorDescarga;
+    private String versionSeleccionada = "26.1.1";
+
     @FXML
-    private Button btnJugar;
+    public void initialize() {
+        System.out.println("[UI] panel principal iniciado");
+        motorDescarga = new DownloaderEngine();
 
-    private String obtenerUsuarioDeSesion() {
-        try {
-            String carpetaHome = System.getProperty("user.home");
-            Path rutaArchivo = Paths.get(carpetaHome, ".thunder", "user_session.txt");
+        btnJugar.setOnAction(e -> lanzarMinecraft());
+        btnAjustes.setOnAction(e -> abrirAjustes());
+        btnInstancias.setOnAction(e -> mostrarInstancias());
 
-            if (Files.exists(rutaArchivo) && Files.size(rutaArchivo) > 70) {
-                String contenido = Files.readString(rutaArchivo, StandardCharsets.UTF_8).trim();
-
-                int lenBasuraInicio = Integer.parseInt(contenido.substring(0, 3));
-                int lenBasuraMedio = Integer.parseInt(contenido.substring(3, 6));
-
-                String dataConBasura = contenido.substring(6);
-                String desdeUsuario = dataConBasura.substring(lenBasuraInicio);
-
-                String usuarioPuroConBasuraMedio = desdeUsuario.substring(0, desdeUsuario.length() - 64);
-                String usuarioReal = usuarioPuroConBasuraMedio.substring(0, usuarioPuroConBasuraMedio.length() - lenBasuraMedio);
-
-                System.out.println("[MOTOR] usuario recuperado de tu token: " + usuarioReal);
-                return usuarioReal;
-            }
-        } catch (Exception e) {
-            System.out.println("[WARN] No se pudo descifrar la sesion fallback " + e.getMessage());
-        }
-        return "ThunderPlayer";
+        cargarVersionesDesdeMojang();
     }
 
-    // Engaño de UUID para cuentas offline
-    private String generarUUIDOffline(String nickname) {
-        java.util.UUID uuid = java.util.UUID.nameUUIDFromBytes(("OfflinePlayer:" + nickname).getBytes(StandardCharsets.UTF_8));
-        return uuid.toString().replace("-", "");
+    private void cargarVersionesDesdeMojang() {
+        lblEstado.setText("Cargando versiones...");
+        cmbVersiones.setDisable(true);
+
+        new Thread(() -> {
+            try {
+                HttpClient client = HttpClient.newHttpClient();
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create("https://launchermeta.mojang.com/mc/game/version_manifest.json"))
+                        .build();
+
+                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                JsonObject json = JsonParser.parseString(response.body()).getAsJsonObject();
+                JsonArray versiones = json.getAsJsonArray("versions");
+
+                List<String> listaLimpia = new ArrayList<>();
+                for (var v : versiones) {
+                    JsonObject obj = v.getAsJsonObject();
+                    String id = obj.get("id").getAsString();
+                    String tipo = obj.get("type").getAsString();
+                    if (tipo.equals("release") || tipo.equals("snapshot")) {
+                        listaLimpia.add(id + " (" + tipo + ")");
+                    }
+                }
+
+                Platform.runLater(() -> {
+                    cmbVersiones.getItems().setAll(listaLimpia);
+                    if (!listaLimpia.isEmpty()) {
+                        cmbVersiones.getSelectionModel().select(0);
+                        versionSeleccionada = listaLimpia.get(0).split(" ")[0];
+                    }
+                    cmbVersiones.setDisable(false);
+                    lblEstado.setText("[Ready] " + listaLimpia.size() + " versiones cargadas");
+                });
+
+            } catch (Exception e) {
+                System.err.println("Error: " + e.getMessage());
+                Platform.runLater(() -> {
+                    cmbVersiones.getItems().add("Error al cargar");
+                    cmbVersiones.setDisable(false);
+                    lblEstado.setText("Sin conexion");
+                });
+            }
+        }).start();
+
+        cmbVersiones.getSelectionModel().selectedItemProperty().addListener((obs, viejo, nuevo) -> {
+            if (nuevo != null) {
+                versionSeleccionada = nuevo.split(" ")[0];
+                lblEstado.setText("📦 " + versionSeleccionada);
+            }
+        });
     }
 
     @FXML
     private void lanzarMinecraft() {
-        System.out.println("[MOTOR] INICIANDOOOOO");
+        if (cmbVersiones.getValue() == null) {
+            mostrarAlerta("Selecciona una versión", Alert.AlertType.WARNING);
+            return;
+        }
 
-        // metemos todo en un hilo separado pa no crashear todo
-        new Thread(() -> {
-            try {
-                String urlJsonMojang = "https://piston-meta.mojang.com/v1/packages/7dfdbbdf9f50ad32650668bbb3897e58ef50abc5/26.1.1.json";
+        lblEstado.setText("Preparando...");
+        btnJugar.setDisable(true);
 
-                // llamamos al fuego
-                System.out.println("[MOTOR] DownloaderEngine AHORA");
-                DownloaderEngine motorDescarga = new DownloaderEngine();
-                motorDescarga.iniciarDescargaTotal(urlJsonMojang);
+        Task<Void> tarea = new Task<>() {
+            @Override
+            protected Void call() {
+                String urlJson = "https://piston-meta.mojang.com/v1/packages/7dfdbbdf9f50ad32650668bbb3897e58ef50abc5/" + versionSeleccionada + ".json";
 
-                // recuperamos cosas
-                String carpetaHome = System.getProperty("user.home");
 
-                // usamos un usuario XD
-                String usuarioLogeado = obtenerUsuarioDeSesion();
+                motorDescarga.setProgresoCallback((descargados, total) -> {
+                    updateProgress(descargados, total);
+                    updateMessage(descargados + "/" + total);
+                });
+                motorDescarga.iniciarDescargaTotal(urlJson, versionSeleccionada);
 
-                String rutaMinecraft = carpetaHome + File.separator + ".thunder";
-                String rutaAssets = rutaMinecraft + File.separator + "assets";
-                String rutaLibraries = rutaMinecraft + File.separator + "libraries";
-                String rutaVersions = rutaMinecraft + File.separator + "versions" + File.separator + "26.1.1";
 
-                List<String> comandos = new ArrayList<>();
-
-                comandos.add("java");
-                comandos.add("-Xmx2G");
-                comandos.add("-XX:+UseG1GC");
-
-                comandos.add("-Djava.library.path=" + rutaVersions + File.separator + "natives");
-
-                // ==========================================================
-                // FIX DEL CLASSPATH ITERATIVO - SIN TOCAR TUS COMENTARIOS
-                // ==========================================================
-                comandos.add("-cp");
-
-                StringBuilder classpath = new StringBuilder();
-                File dirLibs = new File(rutaLibraries);
-
-                if (dirLibs.exists() && dirLibs.isDirectory()) {
-                    File[] archivosLib = dirLibs.listFiles();
-                    if (archivosLib != null) {
-                        for (File lib : archivosLib) {
-                            if (lib.getName().endsWith(".jar")) {
-                                classpath.append(lib.getAbsolutePath()).append(File.pathSeparator);
-                            }
-                        }
-                    }
-                }
-                classpath.append(rutaVersions + File.separator + "26.1.1.jar");
-                comandos.add(classpath.toString());
-
-                comandos.add("net.minecraft.client.main.Main");
-
-                // engao supremo
-                comandos.add("--username");
-                comandos.add(usuarioLogeado);
-
-                comandos.add("--uuid");
-                comandos.add(generarUUIDOffline(usuarioLogeado));
-
-                comandos.add("--accessToken");
-                comandos.add("00000000000000000000000000000000");
-
-                comandos.add("--userType");
-                comandos.add("mojang");
-
-                comandos.add("--version");
-                comandos.add("26.1.1");
-
-                comandos.add("--gameDir");
-                comandos.add(rutaMinecraft);
-
-                comandos.add("--assetsDir");
-                comandos.add(rutaAssets);
-
-                comandos.add("--assetIndex");
-                comandos.add("30");
-
-                // INYECCIÓN DE DEBUG SUPREMO XD
-                System.out.println("=================================================================================");
-                System.out.println("[DEBUG] COMANDO DE ARRANQUE");
-                System.out.println(String.join(" ", comandos));
-                System.out.println("=================================================================================");
-
-                // AHORA YA
-                ProcessBuilder pb = new ProcessBuilder(comandos);
-                pb.directory(new File(rutaMinecraft));
-                pb.inheritIO();
-
-                System.out.println("[MOTOR] lanzando los procesinis");
-                Process procesoMinecraft = pb.start();
-
-                System.out.println("[OK] a viciar noma");
-
-            } catch (Exception e) {
-                System.out.println("[WARN] el proccesbuilder no encontro ni weas " + e.getMessage());
-                e.printStackTrace();
+                // FALLBACK
+                motorDescarga.iniciarDescargaTotal(urlJson);
+                updateProgress(1, 1);
+                return null;
             }
-        }).start(); // FUEGO
+        };
+
+        barraProgreso.progressProperty().bind(tarea.progressProperty());
+        tarea.messageProperty().addListener((obs, v, msg) -> {
+            if (msg != null) lblEstado.setText("⬇️ " + msg);
+        });
+        tarea.setOnSucceeded(e -> {
+            lblEstado.setText("Listo Iniciando!");
+            btnJugar.setDisable(false);
+            ejecutarMinecraft();
+        });
+        tarea.setOnFailed(e -> {
+            lblEstado.setText("Error");
+            btnJugar.setDisable(false);
+            mostrarAlerta("Error: " + tarea.getException().getMessage(), Alert.AlertType.ERROR);
+        });
+
+        new Thread(tarea).start();
     }
 
-    @FXML
-    public void initialize() {
-        System.out.println("[OK] panel listo");
+    private void ejecutarMinecraft() {
+        new Thread(() -> {
+            try {
+                String home = System.getProperty("user.home");
+                String ruta = home + File.separator + ".thunder";
+                String usuario = obtenerUsuarioDeSesion();
+
+                List<String> cmd = new ArrayList<>();
+                cmd.add("java");
+
+                // usa ConfigManager si existe si no fallback a 2048 de ram XD
+                int ram = 2048;
+                try {
+                    ram = ConfigManager.getRamMB();
+                } catch (NoClassDefFoundError ignored) {}
+                cmd.add("-Xmx" + ram + "M");
+                cmd.add("-XX:+UseG1GC");
+
+                // jvm args
+                try {
+                    String args = ConfigManager.getJvmArgs();
+                    if (args != null && !args.isBlank()) {
+                        for (String a : args.split(" ")) if (!a.isBlank()) cmd.add(a);
+                    }
+                } catch (NoClassDefFoundError ignored) {}
+
+                String versions = ruta + File.separator + "versions" + File.separator + versionSeleccionada;
+                String libs = ruta + File.separator + "libraries";
+                String assets = ruta + File.separator + "assets";
+
+                cmd.add("-Djava.library.path=" + versions + File.separator + "natives");
+                cmd.add("-cp");
+
+                StringBuilder cp = new StringBuilder();
+                File dir = new File(libs);
+                if (dir.exists() && dir.isDirectory()) {
+                    for (File f : dir.listFiles()) if (f.getName().endsWith(".jar")) cp.append(f.getAbsolutePath()).append(File.pathSeparator);
+                }
+                cp.append(versions).append(File.separator).append(versionSeleccionada).append(".jar");
+                cmd.add(cp.toString());
+
+                cmd.add("net.minecraft.client.main.Main");
+                cmd.add("--username"); cmd.add(usuario);
+                cmd.add("--uuid"); cmd.add(generarUUIDOffline(usuario));
+                cmd.add("--accessToken"); cmd.add("00000000000000000000000000000000");
+                cmd.add("--userType"); cmd.add("mojang");
+                cmd.add("--version"); cmd.add(versionSeleccionada);
+                cmd.add("--gameDir"); cmd.add(ruta);
+                cmd.add("--assetsDir"); cmd.add(assets);
+                cmd.add("--assetIndex"); cmd.add("30");
+
+                System.out.println("[MOTOR] " + String.join(" ", cmd));
+
+                ProcessBuilder pb = new ProcessBuilder(cmd);
+                pb.directory(new File(ruta));
+                pb.inheritIO();
+                Process p = pb.start();
+                p.waitFor();
+
+            } catch (Exception e) {
+                System.err.println("[ERROR] " + e.getMessage());
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+    private void abrirAjustes() {
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("⚙️ Ajustes");
+        dialog.setHeaderText("Configura RAM y JVM args");
+
+        // slider ram con fallback si ConfigManager no existe
+        int ramActual = 2048;
+        try { ramActual = ConfigManager.getRamMB(); } catch (NoClassDefFoundError ignored) {}
+        Slider sliderRam = new Slider(512, 8192, ramActual);
+        sliderRam.setShowTickLabels(true);
+        sliderRam.setShowTickMarks(true);
+        sliderRam.setMajorTickUnit(1024);
+
+        // jvm args con fallback por si las moscas
+        String argsActuales = "-XX:+UseG1GC";
+        try { argsActuales = ConfigManager.getJvmArgs(); } catch (NoClassDefFoundError ignored) {}
+        TextField txtArgs = new TextField(argsActuales);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10); grid.setVgap(10); grid.setPadding(new Insets(20));
+        grid.add(new Label("RAM máxima:"), 0, 0);
+        grid.add(sliderRam, 1, 0);
+        Label lblRam = new Label((int)sliderRam.getValue() + " MB");
+        grid.add(lblRam, 2, 0);
+        grid.add(new Label("JVM args:"), 0, 1);
+        grid.add(txtArgs, 1, 2, 2, 1);
+
+        sliderRam.valueProperty().addListener((o, v, n) -> lblRam.setText((int)n.doubleValue() + " MB"));
+
+        dialog.getDialogPane().setContent(grid);
+        ButtonType btnOk = new ButtonType("Guardar", ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(btnOk, ButtonType.CANCEL);
+
+        dialog.setResultConverter(t -> {
+            if (t == btnOk) {
+                try {
+                    ConfigManager.setRamMB((int)sliderRam.getValue());
+                    ConfigManager.setJvmArgs(txtArgs.getText());
+                    lblEstado.setText("Ajustes guardados");
+                } catch (NoClassDefFoundError e) {
+                    lblEstado.setText("[FATAL ERROR] ConfigManager no encontrado");
+                }
+            }
+            return null;
+        });
+        dialog.showAndWait();
+    }
+
+    private void mostrarInstancias() {
+        mostrarAlerta("instancias: proximamente jejeje", Alert.AlertType.INFORMATION);
+    }
+
+    private String obtenerUsuarioDeSesion() {
+        try {
+            Path ruta = Paths.get(System.getProperty("user.home"), ".thunder", "user_session.txt");
+            if (Files.exists(ruta)) {
+                String c = Files.readString(ruta).trim();
+                if (c.startsWith("AES_V1:")) {
+                    String datos = SessionManager.desencriptar(c.substring("AES_V1:".length()));
+                    if (datos != null && datos.contains(":")) return datos.split(":")[0];
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("[WARN] " + e.getMessage());
+        }
+        return "ThunderPlayer";
+    }
+
+    private String generarUUIDOffline(String nick) {
+        return java.util.UUID.nameUUIDFromBytes(("OfflinePlayer:" + nick).getBytes(StandardCharsets.UTF_8)).toString().replace("-", "");
+    }
+
+    private void mostrarAlerta(String msg, Alert.AlertType tipo) {
+        Alert a = new Alert(tipo);
+        a.setTitle("ThunderLauncher");
+        a.setHeaderText(null);
+        a.setContentText(msg);
+        a.showAndWait();
     }
 }
