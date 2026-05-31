@@ -11,6 +11,9 @@ import java.nio.file.Paths;
 import java.util.Objects;
 import java.nio.charset.StandardCharsets;
 
+// import pa usar AES
+import com.thunder.launcher.SessionManager;
+
 public class Main extends Application {
 
     @Override
@@ -30,53 +33,50 @@ public class Main extends Application {
                 System.out.println("la carpeta .thunder ya existia de pana");
             }
         } catch (Exception e) {
-            System.out.println("error de escritura cf " + e.getMessage());
+            System.out.println("error de escritura CFFFFFFFFFFF " + e.getMessage());
         }
 
         // ==========================================================
-        // ahora EL DESFOBUSCADOR
+        // lector de AES
         // ==========================================================
         String carpetaHome = System.getProperty("user.home");
         Path rutaArchivo = Paths.get(carpetaHome, ".thunder", "user_session.txt");
 
-        String fxmlInicial = "bienvenida.fxml"; // fallback por si no existe token por si las moscas XD
+        String fxmlInicial = "bienvenida.fxml"; // fallback por si no hay sesion XD
 
         try {
-            // minimo mas de 70 caracteres ahora
-            if (Files.exists(rutaArchivo) && Files.size(rutaArchivo) > 70) {
+            if (Files.exists(rutaArchivo)) {
                 String contenido = Files.readString(rutaArchivo, StandardCharsets.UTF_8).trim();
 
-                System.out.println("[sistema] leyendo los tokens");
+                // detectar el coso viejo y pumba poner AES
+                if (!contenido.startsWith("AES_V1:")) {
+                    System.out.println("[WARN] sesion antigua detectada PROTOCOLO AUTODESTRUCCION BORRANDO SYSTEM32 na mentira XDXD");
+                    Files.deleteIfExists(rutaArchivo);
+                    // Forzar login nuevo
+                } else {
+                    // poner AES y desencriptar
+                    String datosEncriptados = contenido.substring("AES_V1:".length());
+                    String datos = SessionManager.desencriptar(datosEncriptados);
 
-                // desempaquetamos los indices de control XD
-                int lenBasuraInicio = Integer.parseInt(contenido.substring(0, 3));
-                int lenBasuraMedio = Integer.parseInt(contenido.substring(3, 6));
+                    if (datos != null && datos.contains(":")) {
+                        String[] partes = datos.split(":", 2);
+                        String usuario = partes[0];
+                        // String password = partes[1]; // Si lo necesito dsp
 
-                // solo quedarnos con la data
-                String dataConBasura = contenido.substring(6);
-
-                // rebanamos la basura como un pepino sisisiii
-                String desdeUsuario = dataConBasura.substring(lenBasuraInicio);
-
-                // siempre mide 1 stack de caracteres XD
-                String hashGuardado = desdeUsuario.substring(desdeUsuario.length() - 64);
-
-                // ahora esto
-                String usuarioPuroConBasuraMedio = desdeUsuario.substring(0, desdeUsuario.length() - 64);
-                String usuarioGuardado = usuarioPuroConBasuraMedio.substring(0, usuarioPuroConBasuraMedio.length() - lenBasuraMedio);
-
-                if (!usuarioGuardado.isEmpty() && hashGuardado.length() == 64) {
-                    System.out.println("[AUTO-LOGIN] ¡Descifrado de mapa de 3 digitos exitoso!");
-                    System.out.println("[AUTO-LOGIN] Bienvenido " + usuarioGuardado);
-
-                    fxmlInicial = "MainFxml.fxml"; // esto es lo shidori
+                        System.out.println("[AUTO-LOGIN] Sesión AES vvlida para " + usuario);
+                        fxmlInicial = "MainFxml.fxml"; // exito al launcher principal ahora
+                    } else {
+                        System.out.println("[WARN] Sesión AES inválida o corrupta");
+                        Files.deleteIfExists(rutaArchivo); // Limpiar y forzar login
+                    }
                 }
             }
         } catch (Exception e) {
-            System.out.println("[WARN] token corrupto seguramente " + e.getMessage());
+            System.out.println("[WARN] Error leyendo sesion: " + e.getMessage());
+            // fallback por si falla
         }
 
-        System.out.println("[OK] cargando el fxml inteligente: " + fxmlInicial);
+        System.out.println("[OK] cargando el fxml inteligente " + fxmlInicial);
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlInicial));
         Parent root = loader.load();

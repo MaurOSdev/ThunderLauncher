@@ -126,7 +126,7 @@ public class MainFxmlController {
                 comandos.add(rutaAssets);
 
                 comandos.add("--assetIndex");
-                comandos.add("26.1.1");
+                comandos.add("30");
 
                 // INYECCIÓN DE DEBUG SUPREMO XD
                 System.out.println("=================================================================================");

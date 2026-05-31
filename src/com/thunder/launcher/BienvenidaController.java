@@ -7,13 +7,16 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextField;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.Label;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.layout.GridPane;
 import javafx.geometry.Insets;
 import javafx.util.Pair;
 import java.util.Optional;
-import java.security.MessageDigest;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.Path;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -29,7 +32,7 @@ public class BienvenidaController {
     private Button btnMicrosoft;
 
     @FXML
-    private Label lblSubtitulo; // esto es importante lo juro
+    private Label lblSubtitulo;
 
     @FXML
     private void manejarCuentaOffline() {
@@ -68,88 +71,81 @@ public class BienvenidaController {
 
         Optional<Pair<String, String>> resultado = dialog.showAndWait();
 
+        // aqui esta el cambio AES mas validacion
         resultado.ifPresent(credenciales -> {
-            String usuario = credenciales.getKey();
-            String contraPlana = credenciales.getValue();
+            String usuario = credenciales.getKey().trim();
+            String password = credenciales.getValue();
 
-            System.out.println("[logs] Gracias por elegir ThunderLauncher!: " + usuario);
-
-            String contraHasheada = encriptarClave(contraPlana);
-            System.out.println("aca esta el ..." + contraHasheada);
-
-            lblSubtitulo.setText("Gracias por elegir ThunderLauncher " + usuario + "!");
+            // reglas
+            if (!usuario.matches("[a-zA-Z0-9_]{3,16}")) {
+                mostrarError("Usuario: 3-16 letras/números/guion bajo (_)");
+                return;
+            }
+            if (password.length() < 4) {
+                mostrarError("Contraseña: mínimo 4 caracteres");
+                return;
+            }
 
             try {
-                System.out.println("[LOGS] UAUAUAUAUA");
+                // esta wa usa el SessionManager pa configurar pa que quede asi bien fufuafuafuafuafuaf el AES
+                String datos = usuario + ":" + password;
+                String encriptado = SessionManager.encriptar(datos);
 
+                if (encriptado == null) {
+                    mostrarError("Error al procesar la sesión");
+                    return;
+                }
+
+                // guardar el coso
                 String carpetaHome = System.getProperty("user.home");
-                java.nio.file.Path rutaCarpeta = java.nio.file.Paths.get(carpetaHome, ".thunder");
-                java.nio.file.Path rutaArchivo = rutaCarpeta.resolve("user_session.txt");
+                Path rutaCarpeta = Paths.get(carpetaHome, ".thunder");
+                Path rutaArchivo = rutaCarpeta.resolve("user_session.txt");
 
-                // Generador de cosas al azar sin derretir la ram JAJAJA
-                java.util.Random random = new java.util.Random();
-                String caracteres = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;':\",./<>?";
+                Files.createDirectories(rutaCarpeta);
+                Files.writeString(rutaArchivo, "AES_V1:" + encriptado, StandardCharsets.UTF_8);
 
-                // 100 y 200 caracteres
-                int tamanoBasuraInicio = 100 + random.nextInt(200);
-                int tamanoBasuraMedio = 100 + random.nextInt(200);
+                System.out.println("[OK] Sesión guardada con AES");
+                lblSubtitulo.setText("Bienvenido " + usuario + "!");
 
-                // muralla de caracteres que bueno funcionan (creo)
-                StringBuilder basuraInicio = new StringBuilder();
-                for (int i = 0; i < tamanoBasuraInicio; i++) {
-                    basuraInicio.append(caracteres.charAt(random.nextInt(caracteres.length())));
-                }
-
-                // aqui si axnfjasfja
-                StringBuilder basuraMedio = new StringBuilder();
-                for (int i = 0; i < tamanoBasuraMedio; i++) {
-                    basuraMedio.append(caracteres.charAt(random.nextInt(caracteres.length())));
-                }
-
-                // ufff
-                String mapaFicheros = String.format("%03d%03d", tamanoBasuraInicio, tamanoBasuraMedio);
-
-                // ahora si
-                String payloadSupremo = mapaFicheros + basuraInicio.toString() + usuario + basuraMedio.toString() + contraHasheada;
-
-                java.nio.file.Files.writeString(rutaArchivo, payloadSupremo, StandardCharsets.UTF_8);
-                System.out.println("[OK] ahora la sesion portatil esta ok XD");
-
-                // Cambiamos de escena al MainFxml.fxml
-                System.out.println("[LOGS] Mutando el chasis al panel principal...");
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("MainFxml.fxml"));
-                Parent rootPrincipal = loader.load();
-                Stage ventanaActual = (Stage) btnOffline.getScene().getWindow();
-                Scene nuevaEscena = new Scene(rootPrincipal, 500, 500);
-                ventanaActual.setScene(nuevaEscena);
+                // cambiar escena
+                cambiarEscenaMain();
 
             } catch (Exception e) {
-                System.out.println("[ERROR] Falló el coso dinamico: " + e.getMessage());
+                System.out.println("[ERROR] Falló el guardado: " + e.getMessage());
                 e.printStackTrace();
+                mostrarError("Error: " + e.getMessage());
             }
         });
     }
 
     @FXML
     private void manejarCuentaMicrosoft() {
-        System.out.println("[logs] inciar con microsoft");
+        System.out.println("[logs] iniciar con microsoft");
+        mostrarError("Microsoft login: proximamente😏😏😏 XDXDXDXD");
     }
 
-    private String encriptarClave(String claveOriginal) {
+    // metodo pa cambiar escena es reciclable btw
+    private void cambiarEscenaMain() {
         try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(claveOriginal.getBytes(StandardCharsets.UTF_8));
-            StringBuilder hexString = new StringBuilder();
-
-            for (byte b : hash) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) hexString.append('0');
-                hexString.append(hex);
-            }
-            return hexString.toString();
-        } catch (Exception ex) {
-            throw new RuntimeException("[ERROR] hay un error", ex);
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("MainFxml.fxml"));
+            Parent rootPrincipal = loader.load();
+            Stage ventanaActual = (Stage) btnOffline.getScene().getWindow();
+            Scene nuevaEscena = new Scene(rootPrincipal, 500, 500);
+            ventanaActual.setScene(nuevaEscena);
+            System.out.println("[LOGS] Mutando el chasis al panel principal");
+        } catch (Exception e) {
+            System.err.println("[ERROR] No se pudo cambiar de escena: " + e.getMessage());
+            e.printStackTrace();
         }
+    }
+
+    // helper que muestra errores
+    private void mostrarError(String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error de inicio de sesión");
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
     }
 
     @FXML
