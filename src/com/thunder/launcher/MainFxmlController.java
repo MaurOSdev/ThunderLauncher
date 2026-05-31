@@ -156,18 +156,25 @@ public class MainFxmlController {
                 String ruta = home + File.separator + ".thunder";
                 String usuario = obtenerUsuarioDeSesion();
 
-                List<String> cmd = new ArrayList<>();
-                cmd.add("java");
+                // aqui obtiene la version rial
+                String versionId = versionSeleccionada.split(" ")[0];
 
-                // usa ConfigManager si existe si no fallback a 2048 de ram XD
+                // obtener el java correcto
+                String javaPath = JavaManager.getJavaPath(versionId);
+
+                List<String> cmd = new ArrayList<>();
+
+                // en lugar de java usamos la ruta que nos da el JavaManager
+                System.out.println("[JAVA] Ruta usada: " + javaPath);
+                cmd.add(javaPath);
+
+                // RAM configurable (con fallback)
                 int ram = 2048;
-                try {
-                    ram = ConfigManager.getRamMB();
-                } catch (NoClassDefFoundError ignored) {}
+                try { ram = ConfigManager.getRamMB(); } catch (NoClassDefFoundError ignored) {}
                 cmd.add("-Xmx" + ram + "M");
                 cmd.add("-XX:+UseG1GC");
 
-                // jvm args
+                // JVM args
                 try {
                     String args = ConfigManager.getJvmArgs();
                     if (args != null && !args.isBlank()) {
@@ -175,7 +182,7 @@ public class MainFxmlController {
                     }
                 } catch (NoClassDefFoundError ignored) {}
 
-                String versions = ruta + File.separator + "versions" + File.separator + versionSeleccionada;
+                String versions = ruta + File.separator + "versions" + File.separator + versionId;
                 String libs = ruta + File.separator + "libraries";
                 String assets = ruta + File.separator + "assets";
 
@@ -187,7 +194,7 @@ public class MainFxmlController {
                 if (dir.exists() && dir.isDirectory()) {
                     for (File f : dir.listFiles()) if (f.getName().endsWith(".jar")) cp.append(f.getAbsolutePath()).append(File.pathSeparator);
                 }
-                cp.append(versions).append(File.separator).append(versionSeleccionada).append(".jar");
+                cp.append(versions).append(File.separator).append(versionId).append(".jar");
                 cmd.add(cp.toString());
 
                 cmd.add("net.minecraft.client.main.Main");
@@ -195,12 +202,12 @@ public class MainFxmlController {
                 cmd.add("--uuid"); cmd.add(generarUUIDOffline(usuario));
                 cmd.add("--accessToken"); cmd.add("00000000000000000000000000000000");
                 cmd.add("--userType"); cmd.add("mojang");
-                cmd.add("--version"); cmd.add(versionSeleccionada);
+                cmd.add("--version"); cmd.add(versionId);
                 cmd.add("--gameDir"); cmd.add(ruta);
                 cmd.add("--assetsDir"); cmd.add(assets);
-                cmd.add("--assetIndex"); cmd.add("30");
+                cmd.add("--assetIndex"); cmd.add("30"); // Ajustar dinámicamente si es necesario
 
-                System.out.println("[MOTOR] " + String.join(" ", cmd));
+                System.out.println("[MOTOR] Comando: " + String.join(" ", cmd));
 
                 ProcessBuilder pb = new ProcessBuilder(cmd);
                 pb.directory(new File(ruta));
