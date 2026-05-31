@@ -108,25 +108,20 @@ public class MainFxmlController {
             return;
         }
 
-        lblEstado.setText("Preparando...");
+        lblEstado.setText("⬇️ Preparando...");
         btnJugar.setDisable(true);
 
         Task<Void> tarea = new Task<>() {
             @Override
             protected Void call() {
-                String urlJson = "https://piston-meta.mojang.com/v1/packages/7dfdbbdf9f50ad32650668bbb3897e58ef50abc5/" + versionSeleccionada + ".json";
+                // usa la version seleccionada
+                String versionLimpia = versionSeleccionada.split(" ")[0];
+                String urlJson = "https://piston-meta.mojang.com/v1/packages/7dfdbbdf9f50ad32650668bbb3897e58ef50abc5/" + versionLimpia + ".json";
 
-
-                motorDescarga.setProgresoCallback((descargados, total) -> {
-                    updateProgress(descargados, total);
-                    updateMessage(descargados + "/" + total);
-                });
-                motorDescarga.iniciarDescargaTotal(urlJson, versionSeleccionada);
-
-
-                // FALLBACK
+                // arreglao
                 motorDescarga.iniciarDescargaTotal(urlJson);
-                updateProgress(1, 1);
+
+                updateProgress(1, 1); // Marca como completado para la barra
                 return null;
             }
         };

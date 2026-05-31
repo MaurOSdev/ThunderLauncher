@@ -9,22 +9,27 @@
       spacing="25"
       style="-fx-background-color: #0d1117; -fx-padding: 50;">
 
+    <!-- Título -->
     <VBox alignment="CENTER" spacing="5">
         <Label text="ThunderLauncher — Panel Principal"
-               style="-fx-text-fill: #00b4d8; -fx-font-size: 24px; -fx-font-weight: bold; -fx-font-family: 'System';"/>
-        <Label text="elige tu version porfavor!"
+               style="-fx-text-fill: #00b4d8; -fx-font-size: 24px; -fx-font-weight: bold;"/>
+        <Label text="¡Listo para jugar!"
                style="-fx-text-fill: #8b949e; -fx-font-size: 14px;"/>
     </VBox>
 
-    <HBox alignment="CENTER" spacing="10">
-        <Label text="Versión:" style="-fx-text-fill: #c9d1d9; -fx-font-size: 14px; -fx-font-weight: bold;"/>
-        <ComboBox promptText="minecraft 26.1.1"
-                  style="-fx-background-color: #21262d; -fx-text-fill: white; -fx-border-color: #30363d; -fx-border-radius: 6; -fx-background-radius: 6;"/>
-    </HBox>
-
+    <!-- boton principal de jugar -->
     <Button fx:id="btnJugar"
-            text="iniciar minecraft"
-            onAction="#lanzarMinecraft"
-            style="-fx-background-color: #0078d4; -fx-text-fill: white; -fx-padding: 15 30 15 30; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 6;"/>
+            text="INICIAR MINECRAFT"
+            style="-fx-background-color: #0078d4; -fx-text-fill: white; -fx-padding: 15 30; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 6;"/>
+
+    <!-- botones adicionales -->
+    <HBox alignment="CENTER" spacing="10">
+        <Button fx:id="btnInstancias"
+                text="📦 Instancias"
+                style="-fx-background-color: #21262d; -fx-text-fill: #c9d1d9; -fx-padding: 10 20; -fx-background-radius: 6;"/>
+        <Button fx:id="btnAjustes"
+                text="⚙️ Ajustes"
+                style="-fx-background-color: #21262d; -fx-text-fill: #c9d1d9; -fx-padding: 10 20; -fx-background-radius: 6;"/>
+    </HBox>
 
 </VBox>
