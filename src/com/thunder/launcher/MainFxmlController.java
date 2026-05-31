@@ -115,11 +115,18 @@ public class MainFxmlController {
             @Override
             protected Void call() {
                 // usa la version seleccionada
-                String versionLimpia = versionSeleccionada.split(" ")[0];
-                String urlJson = "https://piston-meta.mojang.com/v1/packages/7dfdbbdf9f50ad32650668bbb3897e58ef50abc5/" + versionLimpia + ".json";
+                try {
+                    // Obtener URL dinámica desde el manifest oficial
+                    String versionId = versionSeleccionada.split(" ")[0];
+                    String urlJson = obtenerUrlVersionJson(versionId);
 
-                // arreglao
-                motorDescarga.iniciarDescargaTotal(urlJson);
+                    // Descargar con la URL correcta
+                    motorDescarga.iniciarDescargaTotal(urlJson);
+                } catch (Exception e) {
+                    System.err.println("[ERROR] No se pudo obtener la URL de versión: " + e.getMessage());
+                    updateMessage("Error: " + e.getMessage());
+                    return null;
+                }
 
                 updateProgress(1, 1); // Marca como completado para la barra
                 return null;
@@ -289,4 +296,36 @@ public class MainFxmlController {
         a.setContentText(msg);
         a.showAndWait();
     }
+    private String obtenerUrlVersionJson(String versionId) throws Exception {
+        System.out.println("[MANIFEST] Buscando versión: " + versionId);
+
+        java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient();
+
+        // 1. Descargar version_manifest.json
+        java.net.http.HttpRequest manifestRequest = java.net.http.HttpRequest.newBuilder()
+                .uri(java.net.URI.create("https://launchermeta.mojang.com/mc/game/version_manifest.json"))
+                .build();
+
+        java.net.http.HttpResponse<String> response = client.send(
+                manifestRequest,
+                java.net.http.HttpResponse.BodyHandlers.ofString()
+        );
+
+        com.google.gson.JsonObject manifest = com.google.gson.JsonParser.parseString(response.body()).getAsJsonObject();
+
+        // 2. Buscar la versión en la lista
+        for (com.google.gson.JsonElement v : manifest.getAsJsonArray("versions")) {
+            com.google.gson.JsonObject obj = v.getAsJsonObject();
+            String id = obj.get("id").getAsString();
+
+            if (id.equals(versionId)) {
+                String url = obj.get("url").getAsString();
+                System.out.println("[MANIFEST] URL encontrada: " + url);
+                return url;
+            }
+        }
+
+        throw new RuntimeException("Versión no encontrada: " + versionId);
+    }
+
 }
