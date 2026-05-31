@@ -103,32 +103,30 @@ public class MainFxmlController {
 
     @FXML
     private void lanzarMinecraft() {
-        if (cmbVersiones.getValue() == null) {
-            mostrarAlerta("Selecciona una versión", Alert.AlertType.WARNING);
-            return;
-        }
-
-        lblEstado.setText("⬇️ Preparando...");
-        btnJugar.setDisable(true);
+        // ... validaciones ...
 
         Task<Void> tarea = new Task<>() {
             @Override
             protected Void call() {
-                // usa la version seleccionada
                 try {
-                    // Obtener URL dinámica desde el manifest oficial
                     String versionId = versionSeleccionada.split(" ")[0];
                     String urlJson = obtenerUrlVersionJson(versionId);
 
-                    // Descargar con la URL correcta
-                    motorDescarga.iniciarDescargaTotal(urlJson);
+                    // ESTO ES IMPORTANTISIMO
+                    motorDescarga.setProgresoCallback((descargados, total) -> {
+                        double progreso = (double) descargados / total;
+                        updateProgress(progreso, 1.0);
+                        updateMessage(descargados + "/" + total + " archivos");
+                    });
+
+                    // luego se llama la version dinamica
+                    motorDescarga.iniciarDescargaTotal(urlJson, versionId);
+
                 } catch (Exception e) {
-                    System.err.println("[ERROR] No se pudo obtener la URL de versión: " + e.getMessage());
+                    System.err.println("[ERROR] " + e.getMessage());
                     updateMessage("Error: " + e.getMessage());
                     return null;
                 }
-
-                updateProgress(1, 1); // Marca como completado para la barra
                 return null;
             }
         };
