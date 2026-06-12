@@ -12,6 +12,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.jar.JarFile;
+import java.util.jar.JarEntry;
+import java.util.Enumeration;
 
 public class DownloaderEngine {
 
@@ -55,6 +58,30 @@ public class DownloaderEngine {
 
         } catch (Exception e) {
             System.out.println("[DOWNLOADER] Fallo: " + e.getMessage());
+        }
+    }
+    // ahora esta wa
+    private void extraerJar(String jarPath, String destinoDir) throws Exception {
+        try (JarFile jar = new JarFile(jarPath)) {
+            Enumeration<JarEntry> entries = jar.entries();
+            while (entries.hasMoreElements()) {
+                JarEntry entry = entries.nextElement();
+                File destFile = new File(destinoDir, entry.getName());
+
+                if (entry.isDirectory()) {
+                    destFile.mkdirs();
+                } else {
+                    destFile.getParentFile().mkdirs();
+                    try (java.io.InputStream is = jar.getInputStream(entry);
+                         java.io.FileOutputStream fos = new java.io.FileOutputStream(destFile)) {
+                        byte[] buffer = new byte[4096];
+                        int len;
+                        while ((len = is.read(buffer)) != -1) {
+                            fos.write(buffer, 0, len);
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -105,8 +132,16 @@ public class DownloaderEngine {
                     if (itemLinux != null) {
                         String urlNative = itemLinux.url;
                         String nombreNative = urlNative.substring(urlNative.lastIndexOf('/') + 1);
-                        String destinoNative = rutaNatives + File.separator + nombreNative;
-                        descargarArchivoInmediato(urlNative, destinoNative);
+
+                        // Descargar el jar de natives
+                        String jarDestino = rutaNatives + File.separator + nombreNative;
+                        descargarArchivoInmediato(urlNative, jarDestino);
+
+                        // extraer los .jar XD
+                        if (nombreNative.endsWith(".jar")) {
+                            System.out.println("[DOWNLOADER] Extrayendo natives-linux de: " + nombreNative);
+                            extraerJar(jarDestino, rutaNatives);
+                        }
                     }
                 }
 
