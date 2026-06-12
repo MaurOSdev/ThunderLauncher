@@ -1,6 +1,7 @@
 package com.thunder.launcher;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -81,31 +82,48 @@ public class JavaManager {
     private static void downloadAndExtract(int version, Path folder) throws Exception {
         folder.toFile().mkdirs();
 
-        // urls oficiales de adoptium
+        // urls con jdk no jre que la habia cgado JAJAJ
         String url = switch (version) {
             case 25 -> "https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.3%2B9/OpenJDK25U-jdk_x64_linux_hotspot_25.0.3_9.tar.gz";
-            case 21 -> "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.2%2B13/OpenJDK21U-jre_x64_linux_hotspot_21.0.2_13.tar.gz";
-            case 17 -> "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.10%2B7/OpenJDK17U-jre_x64_linux_hotspot_17.0.10_7.tar.gz";
-            default -> "https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u402-b06/OpenJDK8U-jre_x64_linux_hotspot_8u402b06.tar.gz";
+            case 21 -> "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.2%2B13/OpenJDK21U-jdk_x64_linux_hotspot_21.0.2_13.tar.gz";
+            case 17 -> "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.10%2B7/OpenJDK17U-jdk_x64_linux_hotspot_17.0.10_7.tar.gz";
+            default -> "https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u492-b09/OpenJDK8U-jdk_x64_linux_hotspot_8u492b09.tar.gz";
         };
 
         Path tempFile = folder.resolve("java.tar.gz");
 
-        // Descargar
+        // Descargar  esta wa
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).build();
         client.send(request, HttpResponse.BodyHandlers.ofFile(tempFile));
 
-        // Extraer con tar (nativo de Linux)
+        // Validar descarga
+        if (Files.size(tempFile) == 0) {
+            throw new IOException("Descarga vacía: " + url);
+        }
+
+        // Extraer
         System.out.println("[JAVA] Extrayendo...");
-        ProcessBuilder pb = new ProcessBuilder("tar", "-xzf", tempFile.toString(), "-C", folder.toString(), "--strip-components=1");
-        pb.inheritIO().start().waitFor();
+        ProcessBuilder pb = new ProcessBuilder(
+                "tar", "-xzf", tempFile.toString(),
+                "-C", folder.toString(),
+                "--strip-components=1"
+        );
+        pb.inheritIO();
+        int exitCode = pb.start().waitFor();
+        if (exitCode != 0) {
+            throw new IOException("Error al extraer: Exit code: " + exitCode);
+        }
 
-        // Limpiar y dar permisos
-        Files.delete(tempFile);
+        // Validar extracción
         File binJava = folder.resolve("bin/java").toFile();
-        if (binJava.exists()) binJava.setExecutable(true);
+        if (!binJava.exists()) {
+            throw new RuntimeException("bin/java no existe despues de extraer Estructura inesperada.");
+        }
 
-        System.out.println("[JAVA] Instalación completada en: " + folder);
+        Files.delete(tempFile);
+        binJava.setExecutable(true);
+
+        System.out.println("[JAVA] Instalación completada: " + binJava.getAbsolutePath());
     }
 }
