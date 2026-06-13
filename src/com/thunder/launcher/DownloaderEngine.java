@@ -105,6 +105,15 @@ public class DownloaderEngine {
             MinecraftVersionJson versionData = gson.fromJson(reader, MinecraftVersionJson.class);
             reader.close();
 
+// aca sin redeclarar versionData
+            String assetIndexId = (versionData.assetIndex != null && versionData.assetIndex.id != null)
+                    ? versionData.assetIndex.id
+                    : "legacy";
+
+            Path assetIndexFile = Paths.get(rutaVersiones, "asset_index.txt");
+            Files.writeString(assetIndexFile, assetIndexId);
+            System.out.println("[DOWNLOADER] Asset index guardado: " + assetIndexId);
+
             // Descargar cliente jar
             if (versionData.downloads != null && versionData.downloads.client != null) {
                 descargarArchivoInmediato(versionData.downloads.client.url, rutaJarCliente);
