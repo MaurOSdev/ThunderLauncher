@@ -88,15 +88,29 @@ public class JavaManager {
             case 17 -> "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.13%2B11/OpenJDK17U-jdk_x64_linux_hotspot_17.0.13_11.tar.gz";
             default -> "https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u432-b06/OpenJDK8U-jdk_x64_linux_hotspot_8u432b06.tar.gz";
         };
+        System.out.println("[JAVA] URL: " + url);
 
         Path tempFile = folder.resolve("java.tar.gz");
 
-        HttpClient client = HttpClient.newHttpClient();
+        HttpClient client = HttpClient.newBuilder()
+                .followRedirects(HttpClient.Redirect.ALWAYS)
+                .build();
+
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .build();
 
-        client.send(request, HttpResponse.BodyHandlers.ofFile(tempFile));
+        HttpResponse<Path> response = client.send(
+                request,
+                HttpResponse.BodyHandlers.ofFile(tempFile)
+        );
+
+// Validar que haya sido exitososososo
+        if (response.statusCode() != 200) {
+            throw new IOException("Error HTTP " + response.statusCode() + " descargando JDK");
+        }
+
+        System.out.println("[JAVA] Descargado: " + Files.size(tempFile) + " bytes");
 
         // esta cosa valida que sea un gzip y no un html tdo cagado
         if (Files.size(tempFile) == 0) {
