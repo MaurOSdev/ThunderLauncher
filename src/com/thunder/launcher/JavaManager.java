@@ -84,10 +84,10 @@ public class JavaManager {
 
         // urls con jdk no jre que la habia cgado JAJAJ
         String url = switch (version) {
-            case 25 -> "https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.3%2B9/OpenJDK25U-jdk_x64_linux_hotspot_25.0.3_9.tar.gz";
-            case 21 -> "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.2%2B13/OpenJDK21U-jdk_x64_linux_hotspot_21.0.2_13.tar.gz";
-            case 17 -> "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.10%2B7/OpenJDK17U-jdk_x64_linux_hotspot_17.0.10_7.tar.gz";
-            default -> "https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u492-b09/OpenJDK8U-jdk_x64_linux_hotspot_8u492b09.tar.gz";
+            case 25 -> "https://adoptium.net/es/download?link=https%3A%2F%2Fgithub.com%2Fadoptium%2Ftemurin25-binaries%2Freleases%2Fdownload%2Fjdk-25.0.3%252B9%2FOpenJDK25U-jdk_x64_linux_hotspot_25.0.3_9.tar.gz&vendor=Adoptium";
+            case 21 -> "https://adoptium.net/es/download?link=https%3A%2F%2Fgithub.com%2Fadoptium%2Ftemurin21-binaries%2Freleases%2Fdownload%2Fjdk-21.0.11%252B10%2FOpenJDK21U-jdk_x64_linux_hotspot_21.0.11_10.tar.gz&vendor=Adoptium";
+            case 17 -> "https://adoptium.net/es/download?link=https%3A%2F%2Fgithub.com%2Fadoptium%2Ftemurin17-binaries%2Freleases%2Fdownload%2Fjdk-17.0.19%252B10%2FOpenJDK17U-jdk_x64_linux_hotspot_17.0.19_10.tar.gz&vendor=Adoptium";
+            default -> "https://adoptium.net/es/download?link=https%3A%2F%2Fgithub.com%2Fadoptium%2Ftemurin8-binaries%2Freleases%2Fdownload%2Fjdk8u492-b09%2FOpenJDK8U-jdk_x64_linux_hotspot_8u492b09.tar.gz&vendor=Adoptium";
         };
 
         Path tempFile = folder.resolve("java.tar.gz");
