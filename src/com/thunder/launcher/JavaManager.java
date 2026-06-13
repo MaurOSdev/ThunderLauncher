@@ -82,30 +82,32 @@ public class JavaManager {
     private static void downloadAndExtract(int version, Path folder) throws Exception {
         folder.toFile().mkdirs();
 
-        // urls con jdk no jre que la habia cgado JAJAJ
         String url = switch (version) {
-            case 25 -> "https://adoptium.net/es/download?link=https%3A%2F%2Fgithub.com%2Fadoptium%2Ftemurin25-binaries%2Freleases%2Fdownload%2Fjdk-25.0.3%252B9%2FOpenJDK25U-jdk_x64_linux_hotspot_25.0.3_9.tar.gz&vendor=Adoptium";
-            case 21 -> "https://adoptium.net/es/download?link=https%3A%2F%2Fgithub.com%2Fadoptium%2Ftemurin21-binaries%2Freleases%2Fdownload%2Fjdk-21.0.5%252B11%2FOpenJDK21U-jdk_x64_linux_hotspot_21.0.5_11.tar.gz&vendor=Adoptium";
-            case 17 -> "https://adoptium.net/es/download?link=https%3A%2F%2Fgithub.com%2Fadoptium%2Ftemurin17-binaries%2Freleases%2Fdownload%2Fjdk-17.0.13%252B11%2FOpenJDK17U-jdk_x64_linux_hotspot_17.0.13_11.tar.gz&vendor=Adoptium";
-            default -> "https://adoptium.net/es/download?link=https%3A%2F%2Fgithub.com%2Fadoptium%2Ftemurin8-binaries%2Freleases%2Fdownload%2Fjdk8u432-b06%2FOpenJDK8U-jdk_x64_linux_hotspot_8u432b06.tar.gz&vendor=Adoptium";
+            case 25 -> "https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.1%2B8/OpenJDK25U-jdk_x64_linux_hotspot_25.0.1_8.tar.gz";
+            case 21 -> "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.5%2B11/OpenJDK21U-jdk_x64_linux_hotspot_21.0.5_11.tar.gz";
+            case 17 -> "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.13%2B11/OpenJDK17U-jdk_x64_linux_hotspot_17.0.13_11.tar.gz";
+            default -> "https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u432-b06/OpenJDK8U-jdk_x64_linux_hotspot_8u432b06.tar.gz";
         };
 
         Path tempFile = folder.resolve("java.tar.gz");
 
-        // Descargar  esta wa
-        HttpClient client = HttpClient.newBuilder()
-                .followRedirects(HttpClient.Redirect.ALWAYS)  // sigue las redirecciones de eres adoptado.net XD
-                .build();
-
+        HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .build();
 
         client.send(request, HttpResponse.BodyHandlers.ofFile(tempFile));
 
-        // Validar descarga
+        // esta cosa valida que sea un gzip y no un html tdo cagado
         if (Files.size(tempFile) == 0) {
-            throw new IOException("Descarga vacía: " + url);
+            throw new IOException("Descarga vacia: " + url);
+        }
+
+        // si es un html o empieza con doctype lo tira al agua
+        byte[] header = Files.readAllBytes(tempFile);
+        String headerStr = new String(header, 0, Math.min(15, header.length));
+        if (headerStr.startsWith("<!DOCTYPE") || headerStr.startsWith("<html")) {
+            throw new IOException("La descarga es un HTML no un tar.gz URL invalida: " + url);
         }
 
         // Extraer
@@ -124,7 +126,7 @@ public class JavaManager {
         // Validar extracción
         File binJava = folder.resolve("bin/java").toFile();
         if (!binJava.exists()) {
-            throw new RuntimeException("bin/java no existe despues de extraer Estructura inesperada.");
+            throw new RuntimeException("bin/java no existe después de extraer. Estructura inesperada.");
         }
 
         Files.delete(tempFile);
