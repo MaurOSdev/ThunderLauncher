@@ -94,7 +94,8 @@ public class DownloaderEngine {
             String rutaVersiones = rutaMinecraft + File.separator + "versions" + File.separator + version;
             String rutaJsonLocal = rutaVersiones + File.separator + version + ".json";
             String rutaJarCliente = rutaVersiones + File.separator + version + ".jar";
-            String carpetaLibraries = rutaMinecraft + File.separator + "libraries";
+            String carpetaLibraries = rutaVersiones + File.separator + "libraries";
+            Files.createDirectories(Paths.get(carpetaLibraries));
             String rutaNatives = rutaVersiones + File.separator + "natives";
 
             // descargar json de la version

@@ -156,19 +156,22 @@ public class MainFxmlController {
                 String ruta = home + File.separator + ".thunder";
                 String usuario = obtenerUsuarioDeSesion();
 
-                // aqui obtiene la version rial
                 String versionId = versionSeleccionada.split(" ")[0];
-
-                // obtener el java correcto
                 String javaPath = JavaManager.getJavaPath(versionId);
+
+                // ============================================================
+                // LAS TRES VARIABLES QUE TE FALTABAN (las declaras aquí)
+                // ============================================================
+                String versions = ruta + File.separator + "versions" + File.separator + versionId;
+                String assets = ruta + File.separator + "assets";
+                StringBuilder cp = new StringBuilder();  // ← EL FALLO PRINCIPAL
 
                 List<String> cmd = new ArrayList<>();
 
-                // en lugar de java usamos la ruta que nos da el JavaManager
                 System.out.println("[JAVA] Ruta usada: " + javaPath);
                 cmd.add(javaPath);
 
-                // RAM configurable (con fallback)
+                // RAM configurable
                 int ram = 2048;
                 try { ram = ConfigManager.getRamMB(); } catch (NoClassDefFoundError ignored) {}
                 cmd.add("-Xmx" + ram + "M");
@@ -182,18 +185,22 @@ public class MainFxmlController {
                     }
                 } catch (NoClassDefFoundError ignored) {}
 
-                String versions = ruta + File.separator + "versions" + File.separator + versionId;
-                String libs = ruta + File.separator + "libraries";
-                String assets = ruta + File.separator + "assets";
-
                 cmd.add("-Djava.library.path=" + versions + File.separator + "natives");
                 cmd.add("-cp");
 
-                StringBuilder cp = new StringBuilder();
-                File dir = new File(libs);
-                if (dir.exists() && dir.isDirectory()) {
-                    for (File f : dir.listFiles()) if (f.getName().endsWith(".jar")) cp.append(f.getAbsolutePath()).append(File.pathSeparator);
+                // ============================================================
+                // VAMOS PC AAAAAAAAAAAAAA
+                // ============================================================
+                String libsPorVersion = versions + File.separator + "libraries";
+                File dirLibs = new File(libsPorVersion);
+                if (dirLibs.exists() && dirLibs.isDirectory()) {
+                    for (File f : dirLibs.listFiles()) {
+                        if (f.getName().endsWith(".jar")) {
+                            cp.append(f.getAbsolutePath()).append(File.pathSeparator);
+                        }
+                    }
                 }
+
                 cp.append(versions).append(File.separator).append(versionId).append(".jar");
                 cmd.add(cp.toString());
 
@@ -205,6 +212,7 @@ public class MainFxmlController {
                 cmd.add("--version"); cmd.add(versionId);
                 cmd.add("--gameDir"); cmd.add(ruta);
                 cmd.add("--assetsDir"); cmd.add(assets);
+
                 String assetIndexId = obtenerAssetIndexParaVersion(versionId, versions);
                 cmd.add("--assetIndex"); cmd.add(assetIndexId);
 
