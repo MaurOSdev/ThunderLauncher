@@ -205,7 +205,8 @@ public class MainFxmlController {
                 cmd.add("--version"); cmd.add(versionId);
                 cmd.add("--gameDir"); cmd.add(ruta);
                 cmd.add("--assetsDir"); cmd.add(assets);
-                cmd.add("--assetIndex"); cmd.add("30"); // Ajustar dinámicamente si es necesario
+                String assetIndexId = obtenerAssetIndexParaVersion(versionId, versions);
+                cmd.add("--assetIndex"); cmd.add(assetIndexId);
 
                 System.out.println("[MOTOR] Comando: " + String.join(" ", cmd));
 
@@ -242,7 +243,7 @@ public class MainFxmlController {
 
         GridPane grid = new GridPane();
         grid.setHgap(10); grid.setVgap(10); grid.setPadding(new Insets(20));
-        grid.add(new Label("RAM máxima:"), 0, 0);
+        grid.add(new Label("RAM maxima:"), 0, 0);
         grid.add(sliderRam, 1, 0);
         Label lblRam = new Label((int)sliderRam.getValue() + " MB");
         grid.add(lblRam, 2, 0);
@@ -332,5 +333,18 @@ public class MainFxmlController {
 
         throw new RuntimeException("Versión no encontrada: " + versionId);
     }
+        private String obtenerAssetIndexParaVersion(String versionId, String rutaVersiones) {
+            String assetIndexId = "legacy"; // fallback para versiones viejas
+            try {
+                Path assetIndexFile = Paths.get(rutaVersiones, "asset_index.txt");
+                if (Files.exists(assetIndexFile)) {
+                    assetIndexId = Files.readString(assetIndexFile).trim();
+                    System.out.println("[LAUNCHER] Asset index para " + versionId + ": " + assetIndexId);
+                }
+            } catch (Exception e) {
+                System.err.println("[WARN] No se pudo leer asset_index.txt: " + e.getMessage());
+            }
+            return assetIndexId;
+        }
 
-}
+    }
