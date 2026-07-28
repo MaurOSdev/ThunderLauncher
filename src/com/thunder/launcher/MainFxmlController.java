@@ -56,7 +56,7 @@ public class MainFxmlController {
             try {
                 HttpClient client = HttpClient.newHttpClient();
                 HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create("https://launchermeta.mojang.com/mc/game/version_manifest.json"))
+                        .uri(URI.create("https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"))
                         .build();
 
                 HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
